@@ -11,10 +11,73 @@ import java.util.*;
 import java.util.regex.*;
 import java.io.*;
 
-public class TopicModel {
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.LayoutManager;
 
+import javax.swing.JFrame;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartMouseEvent;
+import org.jfree.chart.ChartMouseListener;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.entity.ChartEntity;
+import org.jfree.chart.entity.PieSectionEntity;
+import org.jfree.chart.plot.PiePlot;
+import org.jfree.chart.plot.PiePlot3D;
+import org.jfree.chart.util.Rotation;
+import org.jfree.data.general.DefaultPieDataset;
+import org.jfree.data.general.PieDataset;
+
+public class TopicModel extends JFrame{
+	private static final long serialVersionUID = 1L;
+
+	public TopicModel(String title) {
+		super(title);
+		Container content = getContentPane();
+		
+		DefaultPieDataset dataSet = new DefaultPieDataset();
+		dataSet.setValue("Test", 100);
+		
+		JFreeChart chart = ChartFactory.createPieChart3D("ChartTitle", dataSet, true, true, false);
+		PiePlot3D plot = (PiePlot3D)chart.getPlot();
+		plot.setStartAngle(290);
+		plot.setDirection(Rotation.CLOCKWISE);
+		plot.setForegroundAlpha(0.5f);
+		
+		ChartPanel cpanel = new ChartPanel(chart);
+		cpanel.setPreferredSize(new Dimension(500, 300));
+		
+		cpanel.addChartMouseListener(new ChartMouseListener() {
+			@Override
+			public void chartMouseMoved(ChartMouseEvent e) {
+			}
+			
+			@Override
+			public void chartMouseClicked(ChartMouseEvent e) {
+				ChartEntity ce = e.getEntity();
+				if (ce instanceof PieSectionEntity) {
+					PieSectionEntity slice = (PieSectionEntity) ce;
+					PiePlot plot = (PiePlot) chart.getPlot();
+					
+					int sliceIndex = slice.getSectionIndex();
+					String sliceName = plot.getDataset().getKeys().get(sliceIndex).toString();
+					System.out.println(sliceName);
+				
+				}
+			}
+		});
+		
+		//content.setLayout();
+		content.add(cpanel);		
+	}
+	
     public static void main(String[] args) throws Exception {
-
+    	TopicModel main = new TopicModel("Topic Modelling Visualization");
+		main.pack();
+		main.setVisible(true);
+    	
         // Begin by importing documents from text to feature sequences
         ArrayList<Pipe> pipeList = new ArrayList<Pipe>();
 
