@@ -2,6 +2,7 @@
 
 
 import cc.mallet.util.*;
+import javafx.scene.layout.Border;
 import cc.mallet.types.*;
 import cc.mallet.pipe.*;
 import cc.mallet.pipe.iterator.*;
@@ -10,6 +11,7 @@ import cc.mallet.topics.*;
 import java.util.*;
 import java.util.regex.*;
 import java.io.*;
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -34,16 +36,32 @@ import org.jfree.chart.plot.PiePlot3D;
 import org.jfree.chart.util.Rotation;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
+import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
+import javax.swing.JMenuBar;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JList;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.AbstractListModel;
+import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
 
-public class TopicModel extends JFrame{
+public class TopicModel extends JFrame {
 	//"/home/desty/uni/semester2/knowledge_discovery/Mallet/stoplists/en.txt"
 	private static File STOPWORDS_FILE;
 	private static final long serialVersionUID = 1L;
 	
 	private PiePlot3D plot;
+	private ParallelTopicModel model;
+	private JList<String> lstTopics;
+	private int selectedTopic = -1;
 
 	public TopicModel(String title) {
 		super(title);
+		final TopicModel that = this;
 		Container content = getContentPane();
 		
 		DefaultPieDataset dataSet = new DefaultPieDataset();
@@ -56,6 +74,8 @@ public class TopicModel extends JFrame{
 		plot.setForegroundAlpha(0.5f);
 		
 		ChartPanel cpanel = new ChartPanel(chart);
+		cpanel.setAlignmentX(Component.RIGHT_ALIGNMENT);
+		cpanel.setAlignmentY(Component.TOP_ALIGNMENT);
 		cpanel.setPreferredSize(new Dimension(500, 300));
 		
 		cpanel.addChartMouseListener(new ChartMouseListener() {
@@ -78,12 +98,7 @@ public class TopicModel extends JFrame{
 			}
 		});
 		
-		content.setLayout(new FlowLayout());
-		
-		
-		final TopicModel that = this;
-		JButton btnFileSelect = new JButton("Select file for analysis");
-		btnFileSelect.addActionListener(new ActionListener() {
+		ActionListener loadCorpusActionListener = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				FileDialog dia = new FileDialog(that, "Select a file");
@@ -97,10 +112,97 @@ public class TopicModel extends JFrame{
 						ex.printStackTrace();
 					}
 				}
+			};
+		};
+		getContentPane().setLayout(new BorderLayout(0, 0));
+		content.add(cpanel, BorderLayout.CENTER);		
+		cpanel.setLayout(new BoxLayout(cpanel, BoxLayout.X_AXIS));
+		
+		/*
+		 	
+		lstTopics.setModel(new AbstractListModel<String>() {
+			public int getSize() {
+				if (selectedTopic < 0)
+					return 0;
+				return that.model.getNumTopics();
+			}
+			public String getElementAt(int index) {
+				if (selectedTopic < 0)
+					return "";
+				
+				ArrayList<TreeSet<IDSorter>> topicSortedWords = that.model.getSortedWords();
+	            Iterator<IDSorter> iter = topicSortedWords.get(selectedTopic).iterator();
+	            String res  = "";
+	            for (int i = 0; i < 3; i++) {
+	            	if (iter.hasNext()) {
+	            		if (!res.isEmpty()) {
+	            			res += ", ";
+	            		}
+	            		res += iter.next();
+	            	}
+	            }
+	            return res;
 			}
 		});
-		content.add(btnFileSelect);
-		content.add(cpanel);
+		 */
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		getContentPane().add(scrollPane, BorderLayout.WEST);
+		lstTopics = new JList<>();
+		scrollPane.setViewportView(lstTopics);
+		lstTopics.setAlignmentX(Component.LEFT_ALIGNMENT);
+		lstTopics.setModel(new AbstractListModel<String>() {
+			public int getSize() {
+				if (that.model == null)
+					return 0;
+				return that.model.getNumTopics();
+			}
+			public String getElementAt(int index) {
+				if (that.model == null)
+					return "";
+				System.out.println();
+				ArrayList<TreeSet<IDSorter>> topicSortedWords = that.model.getSortedWords();
+		        Alphabet dataAlphabet = model.getAlphabet();
+		        
+	            Iterator<IDSorter> iter = topicSortedWords.get(index).iterator();
+	            String res  = "";
+	            for (int i = 0; i < 3; i++) {
+	            	if (iter.hasNext()) {
+	            		if (!res.isEmpty()) {
+	            			res += ", ";
+	            		}
+	            		IDSorter item = iter.next();
+	            		res += dataAlphabet.lookupObject(item.getID()).toString();
+	            	}
+	            }
+	            return res;
+			}
+		});
+		lstTopics.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		
+		lstTopics.addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				JList<String> list = (JList<String>)e.getSource();
+				int selected = list.getSelectedIndex();
+				String selectedTopicName = list.getModel().getElementAt(selected);
+				chart.setTitle(selectedTopicName);
+		        selectTopic(selected);
+			}
+		});
+		
+		JList lstWords = new JList();
+		getContentPane().add(lstWords, BorderLayout.EAST);
+		lstWords.setAlignmentX(Component.RIGHT_ALIGNMENT);
+		
+		JMenuBar menuBar = new JMenuBar();
+		setJMenuBar(menuBar);
+		
+		JMenuItem mntmLoadCorpus = new JMenuItem("Load Corpus");
+		mntmLoadCorpus.addActionListener(loadCorpusActionListener);
+		menuBar.add(mntmLoadCorpus);
 	}
 	
 	public static File loadOrGenerateStopwordPathFile(String stoplistpath, boolean overwrite) {
@@ -144,7 +246,7 @@ public class TopicModel extends JFrame{
         //  Note that the first parameter is passed as the sum over topics, while
         //  the second is the parameter for a single dimension of the Dirichlet prior.
         int numTopics = 20;
-        ParallelTopicModel model = new ParallelTopicModel(numTopics, 1.0, 0.01);
+        model = new ParallelTopicModel(numTopics, 1.0, 0.01);
 
         model.addInstances(instances);
 
@@ -156,7 +258,7 @@ public class TopicModel extends JFrame{
         //  for real applications, use 1000 to 2000 iterations)
         model.setNumIterations(50);
         model.estimate();
-
+    	/*
         // Show the words and topics in the first instance
 
         // The data alphabet maps word IDs to strings
@@ -230,6 +332,27 @@ public class TopicModel extends JFrame{
             }
             System.out.println(out);
         }
+        */
+        lstTopics.updateUI();
+        selectTopic(0);
+	}
+	
+	public void selectTopic(int id) {
+		this.selectedTopic = id;
+		
+        ArrayList<TreeSet<IDSorter>> topicSortedWords = model.getSortedWords();
+        Alphabet dataAlphabet = model.getAlphabet();
+        
+        ((DefaultPieDataset) plot.getDataset()).clear();
+        Iterator<IDSorter> iter = topicSortedWords.get(id).iterator();
+        int r = 0;
+        while (iter.hasNext() && r < 10) {
+            IDSorter idCountPair = iter.next();
+
+        	((DefaultPieDataset) plot.getDataset()).setValue(dataAlphabet.lookupObject(idCountPair.getID()).toString(), idCountPair.getWeight());
+            r++;
+        }
+        this.getContentPane().repaint();
 	}
 	
     public static void main(String[] args) throws Exception {
