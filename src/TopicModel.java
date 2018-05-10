@@ -12,17 +12,20 @@ import java.util.*;
 import java.util.regex.*;
 import java.io.*;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FileDialog;
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartMouseEvent;
@@ -46,8 +49,10 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.AbstractListModel;
+import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.JPanel;
 
 public class TopicModel extends JFrame {
 	//"/home/desty/uni/semester2/knowledge_discovery/Mallet/stoplists/en.txt"
@@ -118,34 +123,6 @@ public class TopicModel extends JFrame {
 		content.add(cpanel, BorderLayout.CENTER);		
 		cpanel.setLayout(new BoxLayout(cpanel, BoxLayout.X_AXIS));
 		
-		/*
-		 	
-		lstTopics.setModel(new AbstractListModel<String>() {
-			public int getSize() {
-				if (selectedTopic < 0)
-					return 0;
-				return that.model.getNumTopics();
-			}
-			public String getElementAt(int index) {
-				if (selectedTopic < 0)
-					return "";
-				
-				ArrayList<TreeSet<IDSorter>> topicSortedWords = that.model.getSortedWords();
-	            Iterator<IDSorter> iter = topicSortedWords.get(selectedTopic).iterator();
-	            String res  = "";
-	            for (int i = 0; i < 3; i++) {
-	            	if (iter.hasNext()) {
-	            		if (!res.isEmpty()) {
-	            			res += ", ";
-	            		}
-	            		res += iter.next();
-	            	}
-	            }
-	            return res;
-			}
-		});
-		 */
-		
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -197,6 +174,57 @@ public class TopicModel extends JFrame {
 		getContentPane().add(lstWords, BorderLayout.EAST);
 		lstWords.setAlignmentX(Component.RIGHT_ALIGNMENT);
 		
+		JPanel panel = new JPanel();
+		getContentPane().add(panel, BorderLayout.EAST);
+		panel.setLayout(new GridLayout(2, 1));
+		panel.setPreferredSize(new Dimension(300,300));
+		JPanel p1 = new JPanel();
+		p1.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		p1.setLayout(new BoxLayout(p1, BoxLayout.Y_AXIS));
+		
+		JLabel words = new JLabel("Most Frequent Words:");
+		words.setAlignmentX(0);
+		//p1.add(words);
+		
+		ArrayList<String> testWordList = new ArrayList<String>();
+		
+		for(int i=0;i<5;i++) {
+			String testWord = "Word"+(i+1);
+			testWordList.add(testWord);
+		}
+		JList wordList = new JList(testWordList.toArray());
+		//wordList.setPreferredSize(new Dimension(200,200));
+		wordList.setAlignmentX(0);
+		wordList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+		wordList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+		JScrollPane listScroller = new JScrollPane(wordList);
+		listScroller.setPreferredSize(new Dimension (250,80));
+		listScroller.setAlignmentX(0);
+		words.setLabelFor(wordList);
+		p1.add(words);
+		p1.add(listScroller);
+		
+		
+		
+		JPanel p2 = new JPanel();
+		p2.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		p2.setLayout(new BoxLayout(p2, BoxLayout.Y_AXIS));
+		
+		JLabel documents = new JLabel("Similar Documents:");
+		documents.setAlignmentX(Component.LEFT_ALIGNMENT);
+		p2.add(documents);
+		//p2.add(wordList);
+		JList docList = new JList();
+		docList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+		docList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+		JScrollPane listScroller2 = new JScrollPane(docList);
+		listScroller2.setPreferredSize(new Dimension(250,80));
+		listScroller.setAlignmentX(0);
+		documents.setLabelFor(docList);
+		p2.add(documents);
+		p2.add(listScroller2);
+		panel.add(p1);
+		panel.add(p2);
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
 		
