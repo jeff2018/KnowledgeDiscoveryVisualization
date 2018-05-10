@@ -24,6 +24,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
@@ -69,6 +70,7 @@ public class TopicModel extends JFrame {
 	private ParallelTopicModel model;
 	private JList<String> lstTopics;
 	private int selectedTopic = -1;
+	InstanceList instances;
 
 	public TopicModel(String title) {
 		super(title);
@@ -112,11 +114,13 @@ public class TopicModel extends JFrame {
 		ActionListener loadCorpusActionListener = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				FileDialog dia = new FileDialog(that, "Select a file");
-				dia.setVisible(true);
-				String filename = dia.getFile();
-				if (filename != null) {
-					File file = new File(dia.getDirectory() + "/" + filename);
+				final JFileChooser fc = new JFileChooser();
+				fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+				//FileDialog dia = new DirectoryDialog(that, "Select a directory");
+				//dia.setVisible(true);
+				int selectState = fc.showOpenDialog(that); //dia.getFile();
+				if (selectState == JFileChooser.APPROVE_OPTION) {
+					File file = fc.getSelectedFile();
 					try {
 						loadData(file);
 					} catch (Exception ex) {
@@ -182,6 +186,7 @@ public class TopicModel extends JFrame {
 		
 		JPanel panel = new JPanel();
 		getContentPane().add(panel, BorderLayout.EAST);
+		
 		panel.setLayout(new GridLayout(2, 1));
 		panel.setPreferredSize(new Dimension(300,300));
 		JPanel p1 = new JPanel();
@@ -237,7 +242,6 @@ public class TopicModel extends JFrame {
 		panel.add(p1);
 		panel.add(p2);
 		
-		
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
 		
@@ -290,17 +294,32 @@ public class TopicModel extends JFrame {
         ArrayList<Pipe> pipeList = new ArrayList<Pipe>();
 
         // Pipes: lowercase, tokenize, remove stopwords, map to features
+
+        pipeList.add(new Input2CharSequence("UTF-8"));
         pipeList.add( new CharSequenceLowercase() );
         pipeList.add( new CharSequence2TokenSequence(Pattern.compile("\\p{L}[\\p{L}\\p{P}]+\\p{L}")) );
         pipeList.add( new TokenSequenceRemoveStopwords(STOPWORDS_FILE, "UTF-8", false, false, false) );
+        pipeList.add(new TokenSequence2PorterStems());
+        
         pipeList.add( new TokenSequence2FeatureSequence());
+        pipeList.add(new Target2Label());
+        //pipeList.add(new FeatureSequence2FeatureVector());
+        pipeList.add(new PrintInputAndTarget());
+        
+        instances = new InstanceList (new SerialPipes(pipeList));
 
-        InstanceList instances = new InstanceList (new SerialPipes(pipeList));
-
-        Reader fileReader = new InputStreamReader(new FileInputStream(file), "UTF-8");
-        instances.addThruPipe(new CsvIterator (fileReader, Pattern.compile("^(\\S*)[\\s,]*(\\S*)[\\s,]*(.*)$"),
-                                               3, 2, 1)); // data, label, name fields
-
+        if (file.isDirectory()) {
+        	FileIterator iterator =
+                    new FileIterator(file, new TxtFilter(),
+                                     FileIterator.LAST_DIRECTORY);
+	
+	        instances.addThruPipe(iterator);
+        } else {
+            Reader fileReader = new InputStreamReader(new FileInputStream(file), "UTF-8");
+            instances.addThruPipe(new CsvIterator (fileReader, Pattern.compile("^(\\S*)[\\s,]*(\\S*)[\\s,]*(.*)$"),
+                                                   3, 2, 1)); // data, label, name fields
+        }
+        
         // Create a model with 100 topics, alpha_t = 0.01, beta_w = 0.01
         //  Note that the first parameter is passed as the sum over topics, while
         //  the second is the parameter for a single dimension of the Dirichlet prior.
@@ -399,6 +418,38 @@ public class TopicModel extends JFrame {
 	public void selectTopic(int id) {
 		this.selectedTopic = id;
 		
+        ArrayList<TreeSet<IDSorter>> topicSortedWords = model.getTopicDocuments(5); //? wtf does 5 do?
+        
+        ((DefaultPieDataset) plot.getDataset()).clear();
+        Iterator<IDSorter> iter = topicSortedWords.get(id).iterator();
+        int r = 0;
+        while (iter.hasNext() && r < 5) {
+        	int docid = iter.next().getID();
+            
+        	String docName = instances.get(docid).getName().toString(); // docAlphabet.lookupObject(docid).toString();
+        	int lastSlash = docName.lastIndexOf("/");
+        	docName = docName.substring(lastSlash + 1);
+        	double probability = model.getTopicProbabilities(docid)[id];
+
+        	((DefaultPieDataset) plot.getDataset()).setValue(docName, probability);
+            r++;
+        }
+        if (iter.hasNext()) {
+        	double remainingProbability = 0;
+            while (iter.hasNext()) {
+            	int docid = iter.next().getID();
+                double probability = model.getTopicProbabilities(docid)[id];
+                remainingProbability += probability;
+            }
+            ((DefaultPieDataset) plot.getDataset()).setValue("other", remainingProbability);
+        }
+        
+        this.getContentPane().repaint();
+	}
+	
+/*	public void selectTopic(int id) {
+		this.selectedTopic = id;
+		
         ArrayList<TreeSet<IDSorter>> topicSortedWords = model.getSortedWords();
         Alphabet dataAlphabet = model.getAlphabet();
         
@@ -412,13 +463,25 @@ public class TopicModel extends JFrame {
             r++;
         }
         this.getContentPane().repaint();
-	}
+	}*/
 	
     public static void main(String[] args) throws Exception {
     	STOPWORDS_FILE = loadOrGenerateStopwordPathFile(args[0], false);
     	TopicModel main = new TopicModel("Topic Modelling Visualization");
 		main.pack();
 		main.setVisible(true);
+    }
+    
+    class TxtFilter implements FileFilter {
+
+        /** Test whether the string representation of the file 
+         *   ends with the correct extension. Note that {@ref FileIterator}
+         *   will only call this filter if the file is not a directory,
+         *   so we do not need to test that it is a file.
+         */
+        public boolean accept(File file) {
+            return file.toString().endsWith(".txt");
+        }
     }
 
 }
