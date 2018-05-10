@@ -179,7 +179,6 @@ public class TopicModel extends JFrame {
 		panel.setLayout(new GridLayout(2, 1));
 		panel.setPreferredSize(new Dimension(300,300));
 		JPanel p1 = new JPanel();
-		p1.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		p1.setLayout(new BoxLayout(p1, BoxLayout.Y_AXIS));
 		
 		JLabel words = new JLabel("Most Frequent Words:");
@@ -202,6 +201,7 @@ public class TopicModel extends JFrame {
 		words.setLabelFor(wordList);
 		p1.add(words);
 		p1.add(listScroller);
+		p1.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 		
 		
 		
@@ -228,6 +228,7 @@ public class TopicModel extends JFrame {
 		documents.setLabelFor(docList);
 		p2.add(documents);
 		p2.add(listScroller2);
+		p2.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 		
 		panel.add(p1);
 		panel.add(p2);
