@@ -71,7 +71,9 @@ public class TopicModel extends JFrame {
 	private JList<String> lstTopics;
 	private int selectedTopic = -1;
 	InstanceList instances;
-
+	private JList wordList;
+	private JList docList;
+	
 	public TopicModel(String title) {
 		super(title);
 		final TopicModel that = this;
@@ -106,7 +108,17 @@ public class TopicModel extends JFrame {
 					int sliceIndex = slice.getSectionIndex();
 					String sliceName = plot.getDataset().getKeys().get(sliceIndex).toString();
 					System.out.println(sliceName);
-				
+
+					int docId = getDocId(sliceName);
+			        List<Integer> rel = getRelevantDocuments(docId);
+			        ((DefaultListModel)docList.getModel()).removeAllElements();
+			        for (Integer i : rel) {
+			        	String fn = instances.get(i).getName().toString();
+
+			        	int lastSlash = fn.lastIndexOf("/");
+			        	fn = fn.substring(lastSlash + 1);
+			        	((DefaultListModel)docList.getModel()).addElement(fn);
+			        }
 				}
 			}
 		});
@@ -196,12 +208,7 @@ public class TopicModel extends JFrame {
 		words.setAlignmentX(0);
 		
 		ArrayList<String> testWordList = new ArrayList<String>();
-		
-		for(int i=0;i<10;i++) {
-			String testWord = "Word"+(i+1);
-			testWordList.add(testWord);
-		}
-		JList wordList = new JList(testWordList.toArray());
+		wordList = new JList(new DefaultListModel<String>());
 		//wordList.setPreferredSize(new Dimension(200,200));
 		wordList.setAlignmentX(0);
 		wordList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
@@ -221,14 +228,7 @@ public class TopicModel extends JFrame {
 		
 		JLabel documents = new JLabel("Similar Documents:");
 		documents.setAlignmentX(0);
-		ArrayList<String> testDocList = new ArrayList<String>();
-		
-		for(int i=0;i<5;i++) {
-			String testDoc = "Doc"+(i+1);
-			testDocList.add(testDoc);
-		}
-		
-		JList docList = new JList(testDocList.toArray());
+		docList = new JList(new DefaultListModel<String>());
 		docList.setAlignmentX(0);
 		docList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		JScrollPane listScroller2 = new JScrollPane(docList);
@@ -267,6 +267,17 @@ public class TopicModel extends JFrame {
 		
 		
 	}
+	
+	private int getDocId(String name) {
+		for (int i = 0; i < instances.size(); i++) {
+			Instance o = instances.get(i);
+			if (o.getName().toString().endsWith("/" + name)) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
 	
 	public static File loadOrGenerateStopwordPathFile(String stoplistpath, boolean overwrite) {
 		try {
@@ -418,13 +429,14 @@ public class TopicModel extends JFrame {
 	public void selectTopic(int id) {
 		this.selectedTopic = id;
 		
-        ArrayList<TreeSet<IDSorter>> topicSortedWords = model.getTopicDocuments(5); //? wtf does 5 do?
-        
+		// update pichart
+        ArrayList<TreeSet<IDSorter>> topicDocuments = model.getTopicDocuments(5); //? wtf does 5 do?
+
         ((DefaultPieDataset) plot.getDataset()).clear();
-        Iterator<IDSorter> iter = topicSortedWords.get(id).iterator();
+        Iterator<IDSorter> dociter = topicDocuments.get(id).iterator();
         int r = 0;
-        while (iter.hasNext() && r < 5) {
-        	int docid = iter.next().getID();
+        while (dociter.hasNext() && r < 5) {
+        	int docid = dociter.next().getID();
             
         	String docName = instances.get(docid).getName().toString(); // docAlphabet.lookupObject(docid).toString();
         	int lastSlash = docName.lastIndexOf("/");
@@ -434,17 +446,61 @@ public class TopicModel extends JFrame {
         	((DefaultPieDataset) plot.getDataset()).setValue(docName, probability);
             r++;
         }
-        if (iter.hasNext()) {
+        if (dociter.hasNext()) {
         	double remainingProbability = 0;
-            while (iter.hasNext()) {
-            	int docid = iter.next().getID();
+            while (dociter.hasNext()) {
+            	int docid = dociter.next().getID();
                 double probability = model.getTopicProbabilities(docid)[id];
                 remainingProbability += probability;
             }
             ((DefaultPieDataset) plot.getDataset()).setValue("other", remainingProbability);
         }
         
+        // update wordslist
+        ArrayList<TreeSet<IDSorter>> topicSortedWords = model.getSortedWords();
+        Alphabet dataAlphabet = model.getAlphabet();
+        
+        ((DefaultListModel)(wordList.getModel())).removeAllElements();
+        Iterator<IDSorter> iter = topicSortedWords.get(id).iterator();
+        r = 0;
+        while (iter.hasNext() && r < 10) {
+            IDSorter idCountPair = iter.next();
+            
+            String word = dataAlphabet.lookupObject(idCountPair.getID()).toString();
+            int wordCount = (int) Math.floor(idCountPair.getWeight());
+            
+            ((DefaultListModel<String>)(wordList.getModel())).addElement(word + " - " + wordCount);
+            r++;
+        }
+        
         this.getContentPane().repaint();
+	}
+	
+	private List<Integer> getRelevantDocuments(int id){
+		TreeMap<Double, Integer> relevance = new TreeMap<>();
+		int docCount = instances.size();
+				
+		double[] pid = model.getTopicProbabilities(id);
+		for (int x = 0; x < docCount; x++) {
+				double[] px = model.getTopicProbabilities(x);
+				double dist = getEuclidDist(px, pid);
+				relevance.put(dist, x);
+				System.out.println(x + " - " + dist);
+		}
+		return new ArrayList<Integer>(relevance.values());
+	}
+	
+	private double getEuclidDist(double[] a, double[] b) {
+		if (a.length != b.length)
+			throw new IllegalStateException("shit's fucked");
+		
+		double res = 0;
+		for (int i = 0; i < a.length; i++) {
+			double c = a[i] - b[i];
+			res += c*c;
+		}
+		
+		return Math.sqrt(res);
 	}
 	
 /*	public void selectTopic(int id) {
