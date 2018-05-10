@@ -184,7 +184,6 @@ public class TopicModel extends JFrame {
 		
 		JLabel words = new JLabel("Most Frequent Words:");
 		words.setAlignmentX(0);
-		//p1.add(words);
 		
 		ArrayList<String> testWordList = new ArrayList<String>();
 		
@@ -211,20 +210,29 @@ public class TopicModel extends JFrame {
 		p2.setLayout(new BoxLayout(p2, BoxLayout.Y_AXIS));
 		
 		JLabel documents = new JLabel("Similar Documents:");
-		documents.setAlignmentX(Component.LEFT_ALIGNMENT);
-		p2.add(documents);
-		//p2.add(wordList);
-		JList docList = new JList();
+		documents.setAlignmentX(0);
+		ArrayList<String> testDocList = new ArrayList<String>();
+		
+		for(int i=0;i<5;i++) {
+			String testDoc = "Doc"+(i+1);
+			testDocList.add(testDoc);
+		}
+		
+		JList docList = new JList(testDocList.toArray());
+		docList.setAlignmentX(0);
 		docList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		docList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
 		JScrollPane listScroller2 = new JScrollPane(docList);
 		listScroller2.setPreferredSize(new Dimension(250,80));
-		listScroller.setAlignmentX(0);
+		listScroller2.setAlignmentX(0);
 		documents.setLabelFor(docList);
 		p2.add(documents);
 		p2.add(listScroller2);
+		
 		panel.add(p1);
 		panel.add(p2);
+		
+		
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
 		
