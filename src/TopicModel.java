@@ -186,7 +186,7 @@ public class TopicModel extends JFrame {
 		
 		ArrayList<String> testWordList = new ArrayList<String>();
 		
-		for(int i=0;i<5;i++) {
+		for(int i=0;i<10;i++) {
 			String testWord = "Word"+(i+1);
 			testWordList.add(testWord);
 		}
@@ -194,7 +194,6 @@ public class TopicModel extends JFrame {
 		//wordList.setPreferredSize(new Dimension(200,200));
 		wordList.setAlignmentX(0);
 		wordList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-		wordList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
 		JScrollPane listScroller = new JScrollPane(wordList);
 		listScroller.setPreferredSize(new Dimension (250,80));
 		listScroller.setAlignmentX(0);
@@ -221,7 +220,6 @@ public class TopicModel extends JFrame {
 		JList docList = new JList(testDocList.toArray());
 		docList.setAlignmentX(0);
 		docList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-		docList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
 		JScrollPane listScroller2 = new JScrollPane(docList);
 		listScroller2.setPreferredSize(new Dimension(250,80));
 		listScroller2.setAlignmentX(0);
