@@ -30,21 +30,21 @@
 %
 %This section introduces the field and the task of this project, the motivation behind the task and the choice of methods, a brief description of the experiments and results. \\
 
-With the exponentially growing amounts of data accumulating in our society, it is very easy to lose the overview in a collection of data. This is where the field of topic modelling comes in handy. Topic modelling is a technique that finds topics in a document, or in a collection of documents. But even with a topic model it still can be hard to imagine what the data set represents and how the components are linked with one another. This is why visualization is so important. It allows, if done correctly, to get an intuitive overview of the data set.\\
+With the exponentially growing amounts of data accumulating in our society, it is very easy to lose the overview in a collection of data. This is where the field of topic modelling comes in handy. Topic modelling is a technique that finds topics in a document, or in a collection of documents. However, even with a topic model it still can be hard to imagine what the data set is actually representing or how the components are linked with each other. A potential aid to tackle this problem is visualization. It represents an important help as it allows, if done correctly, to get an intuitive overview of the data set as well as extracting new information and knowledge.\\
 The task of this project was to think about different kinds of visualization possibilities and to implement the one that seemed the best to us.\\
-We decided to go with an interactive visualisation of the data set. Starting at one document, the visualisation shows some statistics about the topics in the document compared to the whole data set in a pie chart, shows interactively which words from which topic are present to what extent in the given documents, and shows the most similar documents, to which one can also navigate.
+We decided to go with an interactive visualisation of the data set. Starting at one topic, the visualisation shows some statistics about the distribution of that topic in the documents of the whole data set in the form of a pie char. Furthermore, it also interactively displays the frequencies of the words constituting the topic and, upon selection of one of the documents, also lists the most similar documents.
 
 \section{Related Work}
 %
 
 In 2012, A.J.B Chaney and David M. Blei \cite{Chaney2012VisualizingTM} implemented a visualisation of topic models with a user-friendly interface as output, that should be easy to understand for everyone. The interface permits it to navigate through the data set in the following way: one starts with a selection of topics in the whole data set, ordered by which topics appear most often. One then has the possibility to select a topic, which then shows a list of words that constitute this topic, the related documents to this topic and also related topics. From here one can select another topic, or select a document, which in turn will show a view of the document with the related topics of that documents and related documents. Then one can select one of the related documents or topics and so forth. A preliminary user study has found that users found this approach very intuitive and easy to comprehend \cite{Chaney2012VisualizingTM}.\\
-More recently, a tool called \textit{LDAExplore} has been presented \cite{Ganesan2015LDAExploreVT}. This is also a tool for the visualisation of topic models. It works in a different way than the first visualization. First of all, it has several components. One would be parallel coordinates, that show the topic distribution in all the documents. A treemap is used to show the percentage of each topic by assigning a rectangle to each topic where the size of the rectangle is proportional to the importance of the topic in the collection. If a topic is selected, one gets a similar treemap with the 10 most frequent words in the document. Besides the treemap, one also has the possibility to search for top words and other methods for document filtering. The preliminary study conducted on this tool \cite{Ganesan2015LDAExploreVT} showed that if no filtering is applied to the data set, the parallel coordinated look cluttered and hard to read. Overall, not all study participants were able to determine which topics were the most/least important.
+More recently, a tool called \textit{LDAExplore} has been presented \cite{Ganesan2015LDAExploreVT}. This is also a tool for the visualisation of topic models. It works in a different way than the first visualization. First of all, it has several components. One would be parallel coordinates, that show the topic distribution in all the documents. A treemap is used to show the percentage of each topic by assigning a rectangle to each topic where the size of the rectangle is proportional to the importance of the topic in the collection. If a topic is selected, one gets a similar treemap with the 10 most frequent words in the document. Besides the treemap, one also has the possibility to search for top words and other methods for document filtering. The preliminary study conducted on this tool \cite{Ganesan2015LDAExploreVT} showed that if no filtering is applied to the data set, the parallel coordinates look cluttered and hard to read. Overall, not all study participants were able to determine which topics were the most/least important.
 
 \section{Methodology}
 %
 %Introduce the machine learning technique(s) or the algorithm(s) used in the project. \\
 
-Topic modelling is an unsupervised machine learning technique that looks for relations in document collections by finding themes in them. For our visualization, we first apply a topic model called latend Dirichlet allocation (LDA) on our data set. It is a topic model introduced in 2003, which is a probabilistic model over the whole data set, where topics have distributions over words that are present in the documents \cite{Blei03latentdirichlet}.
+Topic modelling is an unsupervised machine learning technique that looks for relations in document collections by finding themes in them. For our visualization, we first apply a topic model called Latend Dirichlet Allocation (LDA) on our data set. It is a topic model introduced in 2003, which is a probabilistic model over the whole data set, where topics have distributions over words that are present in the documents \cite{Blei03latentdirichlet}.
 
 \begin{comment}An example of inserting figures. Position and width of the figure can be adjusted as needed.
 \begin{figure}[!htp]        
@@ -56,9 +56,10 @@ Topic modelling is an unsupervised machine learning technique that looks for rel
 
 \section{Implementation}
 %
-Introduce the data used in the experiments, the setup of the experiments, and the results and/or comparisons. \\
+%Introduce the data used in the experiments, the setup of the experiments, and the results and/or comparisons. \\
 
-
+For our implementation, we used the java library MALLET, which we used for the LDA topic model of our data set. In order to test our program, we used the sample data set provided by Mallet, from which we generated 20 topics. We developed an interactive user interface, which allows the user to select a directory containing the data set to be visualised. The resulting view shown in figure displays on the left a list containing all the topics extracted from the data set. The user is able to select the topic he wishes to visualize from that list. The remaining parts of the interface will adapt accordingly. In the center of the interface, a pie chart shows the five documents where the selected topic is most present. By hovering over one of the slices of the chart, the percentage of the chosen topic that constitutes the document is displayed. Upon a click on a slice, the most similar documents to the one selected, determined by euclidean distance on the topic composition vectors, are displayed. Another information being displayed is the frequency throughout the data set of the words defining the topic.\\
+We decided to visualise the information in the manner described above, which has a similar navigation idea as the Chaney and Blei, as their user study has shown that this approach is very user-friendly and intuitive \cite{Chaney2012VisualizingTM}. It also allows us to give a global perspective of the data collection, yet still providing enough information on the individual documents.
 
 \begin{comment}
 An example of inserting tables. Position of the table can be adjusted as needed.
@@ -77,22 +78,26 @@ An example of inserting tables. Position of the table can be adjusted as needed.
 
 \section{Conclusion}
 %
-Conclude the whole project in short text.
+%Conclude the whole project in short text.
+
+This project has allowed us to gain deeper understanding of the subject of topic modelling. It has challenged us to evaluate different data visualisation techniques in order to find one that is easy to understand and quite complete in introducing the user to the underlying relations and structures of the data set.
 
 \begin{thebibliography}{9}
-  
-\bibitem{Ganesan2015LDAExploreVT}
-  Ashwinkumar Ganesan and Kiant{\'e} Brantley and Shimei Pan and Jian Chen
-  \textit{LDAExplore: Visualizing Topic Models Generated Using Latent Dirichlet Allocation},
-  CoRR,
-  abs/1507.06593,
-  2015
   
 \bibitem{Chaney2012VisualizingTM}
   Allison June-Barlow Chaney and David M. Blei,
   \textit{Visualizing Topic Models},
   ICWSM,
   2012
+  
+    
+\bibitem{Ganesan2015LDAExploreVT}
+  Ashwinkumar Ganesan and Kiant{\'e} Brantley and Shimei Pan and Jian Chen
+  \textit{LDAExplore: Visualizing Topic Models Generated Using Latent Dirichlet Allocation},
+  CoRR,
+  abs/1507.06593,
+  2015
+
   
 \bibitem{Blei03latentdirichlet}
     David M. Blei and Andrew Y. Ng and Michael I. Jordan and John Lafferty,
