@@ -39,7 +39,11 @@ import org.jfree.chart.plot.PiePlot3D;
 import org.jfree.chart.util.Rotation;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
+
+import com.sun.glass.events.KeyEvent;
+
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
@@ -53,6 +57,8 @@ import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JRadioButtonMenuItem;
 
 public class TopicModel extends JFrame {
 	//"/home/desty/uni/semester2/knowledge_discovery/Mallet/stoplists/en.txt"
@@ -238,6 +244,24 @@ public class TopicModel extends JFrame {
 		JMenuItem mntmLoadCorpus = new JMenuItem("Load Corpus");
 		mntmLoadCorpus.addActionListener(loadCorpusActionListener);
 		menuBar.add(mntmLoadCorpus);
+		
+		JMenu menu = new JMenu("Visualization Type");
+		menuBar.add(menu);
+		
+		ButtonGroup group = new ButtonGroup();
+		JRadioButtonMenuItem rbMenuItem1 = new JRadioButtonMenuItem("Circle");
+		rbMenuItem1.setSelected(true);
+		rbMenuItem1.setMnemonic(KeyEvent.VK_R);
+		group.add(rbMenuItem1);
+		menu.add(rbMenuItem1);
+		
+		JRadioButtonMenuItem rbMenuItem2 = new JRadioButtonMenuItem("Option2");
+		rbMenuItem2.setMnemonic(KeyEvent.VK_R);
+		group.add(rbMenuItem2);
+		menu.add(rbMenuItem2);
+		
+		
+		
 	}
 	
 	public static File loadOrGenerateStopwordPathFile(String stoplistpath, boolean overwrite) {
