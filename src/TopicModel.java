@@ -111,13 +111,20 @@ public class TopicModel extends JFrame {
 
 					int docId = getDocId(sliceName);
 			        List<Integer> rel = getRelevantDocuments(docId);
+			        System.out.println(rel);
 			        ((DefaultListModel)docList.getModel()).removeAllElements();
+			        int k = 0;
 			        for (Integer i : rel) {
+			        	if (i.intValue() == docId) {
+			        		continue;
+		        		}
 			        	String fn = instances.get(i).getName().toString();
 
 			        	int lastSlash = fn.lastIndexOf("/");
 			        	fn = fn.substring(lastSlash + 1);
 			        	((DefaultListModel)docList.getModel()).addElement(fn);
+			        	k++;
+			        	if (k >= 5) break;
 			        }
 				}
 			}
@@ -305,7 +312,6 @@ public class TopicModel extends JFrame {
         ArrayList<Pipe> pipeList = new ArrayList<Pipe>();
 
         // Pipes: lowercase, tokenize, remove stopwords, map to features
-
         pipeList.add(new Input2CharSequence("UTF-8"));
         pipeList.add( new CharSequenceLowercase() );
         pipeList.add( new CharSequence2TokenSequence(Pattern.compile("\\p{L}[\\p{L}\\p{P}]+\\p{L}")) );
@@ -347,81 +353,7 @@ public class TopicModel extends JFrame {
         //  for real applications, use 1000 to 2000 iterations)
         model.setNumIterations(50);
         model.estimate();
-    	/*
-        // Show the words and topics in the first instance
-
-        // The data alphabet maps word IDs to strings
-        Alphabet dataAlphabet = instances.getDataAlphabet();
         
-        FeatureSequence tokens = (FeatureSequence) model.getData().get(0).instance.getData();
-        LabelSequence topics = model.getData().get(0).topicSequence;
-        
-        Formatter out = new Formatter(new StringBuilder(), Locale.US);
-        for (int position = 0; position < tokens.getLength(); position++) {
-            out.format("%s-%d ", dataAlphabet.lookupObject(tokens.getIndexAtPosition(position)), topics.getIndexAtPosition(position));
-        }
-        System.out.println(out);
-        
-        // Estimate the topic distribution of the first instance, 
-        //  given the current Gibbs state.
-        double[] topicDistribution = model.getTopicProbabilities(0);
-
-        // Get an array of sorted sets of word ID/count pairs
-        ArrayList<TreeSet<IDSorter>> topicSortedWords = model.getSortedWords();
-        
-        // Show top 5 words in topics with proportions for the first document
-        for (int topic = 0; topic < numTopics; topic++) {
-            Iterator<IDSorter> iterator = topicSortedWords.get(topic).iterator();
-            
-            out = new Formatter(new StringBuilder(), Locale.US);
-            out.format("%d\t%.3f\t", topic, topicDistribution[topic]);
-            int rank = 0;
-            while (iterator.hasNext() && rank < 5) {
-                IDSorter idCountPair = iterator.next();
-                out.format("%s (%.0f) ", dataAlphabet.lookupObject(idCountPair.getID()), idCountPair.getWeight());
-                rank++;
-            }
-            System.out.println(out);
-        }
-        
-        // Create a new instance with high probability of topic 0
-        StringBuilder topicZeroText = new StringBuilder();
-        Iterator<IDSorter> iterator = topicSortedWords.get(0).iterator();
-
-        int rank = 0;
-        while (iterator.hasNext() && rank < 5) {
-            IDSorter idCountPair = iterator.next();
-            topicZeroText.append(dataAlphabet.lookupObject(idCountPair.getID()) + " ");
-            rank++;
-        }
-
-        // Create a new instance named "test instance" with empty target and source fields.
-        InstanceList testing = new InstanceList(instances.getPipe());
-        testing.addThruPipe(new Instance(topicZeroText.toString(), null, "test instance", null));
-
-        TopicInferencer inferencer = model.getInferencer();
-        double[] testProbabilities = inferencer.getSampledDistribution(testing.get(0), 10, 1, 5);
-        System.out.println("0\t" + testProbabilities[0]);
-        
-        
-        // Show top 5 words in topics with proportions for the first document
-        ((DefaultPieDataset) plot.getDataset()).clear();
-        for (int topic = 0; topic < 1; topic++) {
-            Iterator<IDSorter> iter = topicSortedWords.get(topic).iterator();
-            
-            out = new Formatter(new StringBuilder(), Locale.US);
-            out.format("%d\t%.3f\t", topic, topicDistribution[topic]);
-            int r = 0;
-            while (iter.hasNext() && r < 5) {
-                IDSorter idCountPair = iter.next();
-                out.format("%s (%.0f) ", dataAlphabet.lookupObject(idCountPair.getID()), idCountPair.getWeight());
-
-            	((DefaultPieDataset) plot.getDataset()).setValue(dataAlphabet.lookupObject(idCountPair.getID()).toString(), idCountPair.getWeight());
-                r++;
-            }
-            System.out.println(out);
-        }
-        */
         lstTopics.updateUI();
         selectTopic(0);
 	}
@@ -430,7 +362,7 @@ public class TopicModel extends JFrame {
 		this.selectedTopic = id;
 		
 		// update pichart
-        ArrayList<TreeSet<IDSorter>> topicDocuments = model.getTopicDocuments(5); //? wtf does 5 do?
+        ArrayList<TreeSet<IDSorter>> topicDocuments = model.getTopicDocuments(5); // 5 is smoothing parameter
 
         ((DefaultPieDataset) plot.getDataset()).clear();
         Iterator<IDSorter> dociter = topicDocuments.get(id).iterator();
@@ -438,7 +370,7 @@ public class TopicModel extends JFrame {
         while (dociter.hasNext() && r < 5) {
         	int docid = dociter.next().getID();
             
-        	String docName = instances.get(docid).getName().toString(); // docAlphabet.lookupObject(docid).toString();
+        	String docName = instances.get(docid).getName().toString();
         	int lastSlash = docName.lastIndexOf("/");
         	docName = docName.substring(lastSlash + 1);
         	double probability = model.getTopicProbabilities(docid)[id];
@@ -479,7 +411,7 @@ public class TopicModel extends JFrame {
 	private List<Integer> getRelevantDocuments(int id){
 		TreeMap<Double, Integer> relevance = new TreeMap<>();
 		int docCount = instances.size();
-				
+
 		double[] pid = model.getTopicProbabilities(id);
 		for (int x = 0; x < docCount; x++) {
 				double[] px = model.getTopicProbabilities(x);
@@ -492,7 +424,7 @@ public class TopicModel extends JFrame {
 	
 	private double getEuclidDist(double[] a, double[] b) {
 		if (a.length != b.length)
-			throw new IllegalStateException("shit's fucked");
+			throw new IllegalStateException("something very bad has happend");
 		
 		double res = 0;
 		for (int i = 0; i < a.length; i++) {
@@ -502,24 +434,6 @@ public class TopicModel extends JFrame {
 		
 		return Math.sqrt(res);
 	}
-	
-/*	public void selectTopic(int id) {
-		this.selectedTopic = id;
-		
-        ArrayList<TreeSet<IDSorter>> topicSortedWords = model.getSortedWords();
-        Alphabet dataAlphabet = model.getAlphabet();
-        
-        ((DefaultPieDataset) plot.getDataset()).clear();
-        Iterator<IDSorter> iter = topicSortedWords.get(id).iterator();
-        int r = 0;
-        while (iter.hasNext() && r < 10) {
-            IDSorter idCountPair = iter.next();
-
-        	((DefaultPieDataset) plot.getDataset()).setValue(dataAlphabet.lookupObject(idCountPair.getID()).toString(), idCountPair.getWeight());
-            r++;
-        }
-        this.getContentPane().repaint();
-	}*/
 	
     public static void main(String[] args) throws Exception {
     	STOPWORDS_FILE = loadOrGenerateStopwordPathFile(args[0], false);
