@@ -80,11 +80,11 @@ public class TopicModel extends JFrame {
 		Container content = getContentPane();
 		
 		DefaultPieDataset dataSet = new DefaultPieDataset();
-		dataSet.setValue("Test", 100);
+		//dataSet.setValue("No Data Yet", 100);
 		
-		JFreeChart chart = ChartFactory.createPieChart3D("ChartTitle", dataSet, true, true, false);
+		JFreeChart chart = ChartFactory.createPieChart3D("", dataSet, true, true, false);
 		plot = (PiePlot3D)chart.getPlot();
-		plot.setStartAngle(290);
+		plot.setStartAngle(270);
 		plot.setDirection(Rotation.CLOCKWISE);
 		plot.setForegroundAlpha(0.5f);
 		
@@ -169,21 +169,7 @@ public class TopicModel extends JFrame {
 				if (that.model == null)
 					return "";
 				System.out.println();
-				ArrayList<TreeSet<IDSorter>> topicSortedWords = that.model.getSortedWords();
-		        Alphabet dataAlphabet = model.getAlphabet();
-		        
-	            Iterator<IDSorter> iter = topicSortedWords.get(index).iterator();
-	            String res  = "";
-	            for (int i = 0; i < 3; i++) {
-	            	if (iter.hasNext()) {
-	            		if (!res.isEmpty()) {
-	            			res += ", ";
-	            		}
-	            		IDSorter item = iter.next();
-	            		res += dataAlphabet.lookupObject(item.getID()).toString();
-	            	}
-	            }
-	            return res;
+				return getTopicSummary(index);
 			}
 		});
 		lstTopics.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -270,9 +256,24 @@ public class TopicModel extends JFrame {
 		rbMenuItem2.setMnemonic(KeyEvent.VK_R);
 		group.add(rbMenuItem2);
 		menu.add(rbMenuItem2);
-		
-		
-		
+	}
+	
+	private String getTopicSummary(int topicId) {
+		ArrayList<TreeSet<IDSorter>> topicSortedWords = this.model.getSortedWords();
+        Alphabet dataAlphabet = model.getAlphabet();
+        
+        Iterator<IDSorter> iter = topicSortedWords.get(topicId).iterator();
+        String res  = "";
+        for (int i = 0; i < 3; i++) {
+        	if (iter.hasNext()) {
+        		if (!res.isEmpty()) {
+        			res += ", ";
+        		}
+        		IDSorter item = iter.next();
+        		res += dataAlphabet.lookupObject(item.getID()).toString();
+        	}
+        }
+        return res;
 	}
 	
 	private int getDocId(String name) {
@@ -404,6 +405,8 @@ public class TopicModel extends JFrame {
             ((DefaultListModel<String>)(wordList.getModel())).addElement(word + " - " + wordCount);
             r++;
         }
+
+		plot.getChart().setTitle(getTopicSummary(id));
         
         this.getContentPane().repaint();
 	}
