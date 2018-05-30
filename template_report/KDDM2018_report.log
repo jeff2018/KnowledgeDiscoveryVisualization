@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (MiKTeX 2.9.6500 64-bit) (preloaded format=pdflatex 2017.11.21)  10 MAY 2018 18:54
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (MiKTeX 2.9.6500 64-bit) (preloaded format=pdflatex 2017.11.21)  30 MAY 2018 14:50
 entering extended mode
 **./KDDM2018_report.tex
 (KDDM2018_report.tex
@@ -216,24 +216,36 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <6> on input line 26.
  [1
 
-{C:/Users/somet/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}] [2] [3]
-(KDDM2018_report.aux) ) 
+{C:/Users/somet/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}]
+<index.jpg, id=10, 1606.0pt x 584.1825pt>
+File: index.jpg Graphic file (type jpg)
+<use index.jpg>
+Package pdftex.def Info: index.jpg  used on input line 93. on input line 93.
+Package pdftex.def Info: Requested size: 481.80373pt x 175.25609pt on input lin
+e 93.
+
+Overfull \hbox (12.33327pt too wide) in paragraph at lines 93--94
+ [][] 
+ []
+
+[2] [3 <./index.jpg>] (KDDM2018_report.aux) ) 
 Here is how much of TeX's memory you used:
- 2473 strings out of 493312
- 37230 string characters out of 3138898
- 105707 words of memory out of 3000000
- 6005 multiletter control sequences out of 15000+200000
+ 2480 strings out of 493312
+ 37309 string characters out of 3138898
+ 105703 words of memory out of 3000000
+ 6011 multiletter control sequences out of 15000+200000
  7926 words of font info for 28 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 41i,6n,25p,1140b,213s stack positions out of 5000i,500n,10000p,200000b,50000s
-<C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts
-/cm/cmbx12.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr1
-0.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:
-/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr17.pfb><C:/Program 
-Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmti10.pfb>
-Output written on KDDM2018_report.pdf (3 pages, 84544 bytes).
+ 41i,7n,25p,1281b,219s stack positions out of 5000i,500n,10000p,200000b,50000s
+<C:/Program Files/MiKTeX 2.9/fonts
+/type1/public/amsfonts/cm/cmbx12.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/p
+ublic/amsfonts/cm/cmr10.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/ams
+fonts/cm/cmr12.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/
+cmr17.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmti10.pf
+b>
+Output written on KDDM2018_report.pdf (3 pages, 246464 bytes).
 PDF statistics:
- 32 PDF objects out of 1000 (max. 8388607)
+ 33 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
- 1 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 6 words of extra memory for PDF output out of 10000 (max. 10000000)
 
